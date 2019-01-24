@@ -1,0 +1,30 @@
+{
+  "name": "personal_finance_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "ts-node ./lib/server.ts",
+    "start": "/usr/local/bin/node ./dist/server.js",
+    "prod": "npm run build && npm run start"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/bson": "^1.0.11",
+    "@types/express": "^4.16.0",
+    "@types/mongoose": "^5.2.5",
+    "@types/xlsx": "0.0.36",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "moment": "^2.22.2",
+    "mongodb": "^2.1.16",
+    "mongoose": "^5.2.8",
+    "parse-decimal-number": "^1.0.0",
+    "tsc-node": "0.0.3",
+    "xlsx": "^0.13.4"
+  }
+}
