@@ -29,6 +29,8 @@ export class Routes {
         app.route('/movementsByCategory').get(this.movementsController.getMovementsByCategory);
 
         app.route('/accounts').get(this.accountsController.getAccounts);
+
+        app.route('/accountsBalances').get(this.accountsController.getAccountBalances);
         
         // Contact detail
         app.route('/contact/:contactId')

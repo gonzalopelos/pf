@@ -1,6 +1,10 @@
 import * as mongoose from 'mongoose';
 import {AccountSchema, AccountBalanceSchema} from '../models/accountsModel';
 import {Account} from '../entities/account'
+import { AccountBalance } from '../entities/accountBalance';
+import * as moment from 'moment';
+
+
 const AccountModel = mongoose.model('accounts', AccountSchema);
 const AccountBalanceModel = mongoose.model('accountBalances', AccountBalanceSchema);
 export class AccountsLogic {
@@ -55,5 +59,27 @@ export class AccountsLogic {
         });
 
         
+    }
+
+    public getAccountBalances(callback:(err:any, accountsBalances:AccountBalance[])=>void, accountNumber:string = undefined, year: number = undefined):void{
+        let accountsBalances: AccountBalance[] = [];
+        let dateFrom: Date =  new Date(year != undefined ? year: 2000, 0);
+        let dateTo: Date = new Date(year != undefined ? year : 2100, 11);
+        let conditions: any = {
+            date:{
+                '$gte': dateFrom,
+                '$lte': dateTo
+            }
+        };
+        if(!!accountNumber){
+            conditions['accountNumber'] = accountNumber.trim();
+        }
+
+        AccountBalanceModel.find(conditions, (err, accountBalancessAux)=>{
+            if(!err){
+                accountBalancessAux.forEach(accB => accountsBalances.push(accB.toJSON()as AccountBalance));
+            }
+            callback(err, accountsBalances);
+        })
     }
 }

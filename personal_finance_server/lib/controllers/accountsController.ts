@@ -14,4 +14,16 @@ export class AccountsController {
             }
         });
     }
+
+    public getAccountBalances(req:Request, res:Response){
+        let year: number = req.query.year;
+        accountsLogic.getAccountBalances((err, accountBalances)=>{
+            if(err){
+                res.send(err);
+            }else{
+                res.json(accountBalances);
+            }
+
+        }, req.param("accountNumber", undefined), year)
+    }
 }
