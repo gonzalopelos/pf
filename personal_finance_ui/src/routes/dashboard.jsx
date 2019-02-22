@@ -17,6 +17,7 @@ import Maps from "views/Maps/Maps.jsx";
 import NotificationsPage from "views/Notifications/Notifications.jsx";
 import UpgradeToPro from "views/UpgradeToPro/UpgradeToPro.jsx";
 import Movements from "views/Movements/Movements.jsx"
+import AccountBalances from "views/AccountBalances/AccountBalances.jsx";
 
 const dashboardRoutes = [
   {
@@ -39,6 +40,13 @@ const dashboardRoutes = [
     navbarName: "Table List",
     icon: "content_paste",
     component: Movements
+  },
+  {
+    path: "/accountsBalances",
+    sidebarName: "Balances de cuenta",
+    navbarName: "Balances de cuenta",
+    icon: "content_paste",
+    component: AccountBalances
   },
   {
     path: "/typography",

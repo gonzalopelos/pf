@@ -79,6 +79,10 @@ export class AccountsLogic {
             if(!err){
                 accountBalancessAux.forEach(accB => accountsBalances.push(accB.toJSON()as AccountBalance));
             }
+            if(!!year){
+                accountsBalances.sort((a,b) => a.date.getMonth() - b.date.getMonth());
+            }
+
             callback(err, accountsBalances);
         })
     }

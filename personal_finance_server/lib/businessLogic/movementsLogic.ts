@@ -7,6 +7,7 @@ import { MovementCategory } from '../entities/MovementCategory';
 import { MovementCategoryMapping } from '../entities/MovementCategoryMapping';
 import { MovementsByCategory } from '../entities/movementsByCategory';
 import { AccountsLogic } from './accountsLogic';
+import { Banks } from '../entities/Banks';
 
 const MovementCategoryModel = mongoose.model('movement_categories', MovementCategorySchema);
 const MovementModel = mongoose.model('movements', MovementSchema);
@@ -44,56 +45,57 @@ export class MovementsLogic {
         // });
     }
 
-    public generateMovements(filePath: string, callback: (movements: Movement[]) => void): void {
+    public generateMovements(filePath: string, bank: Banks, callback: (movements: Movement[]) => void): void {
         let xlsxParser = new XlsxParser();
-        let accountMovements = xlsxParser.parseXlsx(filePath);
+        let accountMovements = xlsxParser.parseXlsx(filePath, bank);
 
         accountsLogic.updateAccount(accountMovements.account);
-        
-        this.getMovementCategories((err, categories) => {
-            if (!err) {
-                this.getMovementCategoryMappings((err, catMapps) => {
-                    this.categorizeMovements(accountMovements.movements, categories, catMapps);
-
-                    let newMovementModel = new MovementModel();
-                    
-                    accountMovements.movements.forEach(mov =>{
-                        mov.credit
-                        newMovementModel.collection.findOneAndUpdate(
-                            {
-                            accountNumber: mov.accountNumber,
-                            credit: mov.credit,
-                            debit: mov.debit,
-                            description: mov.description,
-                            movementType: mov.movementType,
-                            date: mov.date
-                            },
-                            {$set:{
+        if(accountMovements.movements && accountMovements.movements.length > 0){
+            this.getMovementCategories((err, categories) => {
+                if (!err) {
+                    this.getMovementCategoryMappings((err, catMapps) => {
+                        this.categorizeMovements(accountMovements.movements, categories, catMapps);
+    
+                        let newMovementModel = new MovementModel();
+                        
+                        accountMovements.movements.forEach(mov =>{
+                            mov.credit
+                            newMovementModel.collection.findOneAndUpdate(
+                                {
                                 accountNumber: mov.accountNumber,
                                 credit: mov.credit,
                                 debit: mov.debit,
                                 description: mov.description,
                                 movementType: mov.movementType,
-                                category: mov.category,
                                 date: mov.date
-                            }},
-                            {upsert: true}, (err, mov)=>{
-                                if(err)
-                                {
-                                    console.log(err);
-                                };
+                                },
+                                {$set:{
+                                    accountNumber: mov.accountNumber,
+                                    credit: mov.credit,
+                                    debit: mov.debit,
+                                    description: mov.description,
+                                    movementType: mov.movementType,
+                                    category: mov.category,
+                                    date: mov.date
+                                }},
+                                {upsert: true}, (err, mov)=>{
+                                    if(err)
+                                    {
+                                        console.log(err);
+                                    };
+                            
+                                }
+                            );
+                        });
+    
+                        // newMovementModel.collection.insert(accountMovements.movements);
                         
-                            }
-                        );
+                        
+                        callback(accountMovements.movements);
                     });
-
-                    // newMovementModel.collection.insert(accountMovements.movements);
-                    
-                    
-                    callback(accountMovements.movements);
-                });
-            }
-        });
+                }
+            });
+        }
     }
 
     public getMovements(callback: (err: any, movements: Movement[]) => void): void {

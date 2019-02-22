@@ -30,7 +30,7 @@ let pickerLang = {
   , from: 'From', to: 'To'
   , years: [2018, 2019, 2020, 2021, 2022, 2023]
 }
-  , mrange = { from: { year: 2014, month: 8 }, to: { year: 2015, month: 5 } }
+let mrange = { from: { year: 2014, month: 8 }, to: { year: 2015, month: 5 } }
 
 let makeText = m => {
   if (m && m.year && m.month) return (pickerLang.months[m.month - 1] + '. ' + m.year)

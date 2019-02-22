@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import {MovementsLogic} from '../businessLogic/movementsLogic' 
+import { Banks } from '../entities/Banks';
 
 
 export class MovementController{
@@ -26,8 +27,8 @@ export class MovementController{
 
     public generateMovements(req: Request, res: Response){
         let movementsLogic: MovementsLogic = new MovementsLogic();
-        
-        movementsLogic.generateMovements(req.param("filePath", ""), (movements)=>{
+        let bank: Banks = Banks[req.param("bank", Banks.Santander)];
+        movementsLogic.generateMovements(req.param("filePath", ""), bank,(movements)=>{
             res.json(movements);
         });
     }
