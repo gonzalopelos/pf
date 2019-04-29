@@ -2,32 +2,23 @@
 import React from "react";
 import { Chart } from "react-google-charts";
 import * as moment from 'moment';
-import Picker from 'react-month-picker'
-import MonthBox from "components/MonthBox/MonthBox.jsx"
+import Dropdown from 'react-dropdown'
+import 'react-dropdown/style.css'
+import Grid from "@material-ui/core/Grid";
 var _ = require('underscore');
 
 const anualData = [
     ["Mes", "Santander UYU", "BROU USD", "BROU UYU"]
 ];
-const options = {
-    title: "Balances de cuentas anual",
-    curveType: "function",
-    legend: { position: "bottom" }
-};
+
+
+const yearsOptions = [
+    { value: 2018, label: '2018' }, { value: 2019, lbel: '2019' }, { value: 2020, label: '2020' }, { value: 2021, label: '2021' }, { value: 2022, label: '2022' }, { value: 2023, label: '2023' }
+];
 
 const brou_uyu = "001298002-00001";
 const boru_usd = "001251612-00001";
 const santander_uyu = "007000081226";
-
-let pickerLang = {
-    months: ['Jan', 'Feb', 'Mar', 'Spr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    , from: 'From', to: 'To'
-    , years: [2018, 2019, 2020, 2021, 2022, 2023]
-}
-let makeText = m => {
-    if (m && m.year && m.month) return (pickerLang.months[m.month - 1] + '. ' + m.year)
-    return '?'
-}
 
 class AccountBalances extends React.Component {
 
@@ -35,62 +26,22 @@ class AccountBalances extends React.Component {
         super();
         this.state = {
             accountBalancesData: anualData,
-            mvalue: {year: 2018, month: 11},
+            selectedYear: yearsOptions[0],
         }
-
-        this.handleClickMonthBox = this.handleClickMonthBox.bind(this)
-        this.handleAMonthChange = this.handleAMonthChange.bind(this)
-        this.handleAMonthDissmis = this.handleAMonthDissmis.bind(this)
-
+        this.selectedYearChange = this.selectedYearChange.bind(this);
     };
-
-
-    handleAMonthChange(year, month) {
-        this.setState({ mvalue: { year: year, month: month } });
-    }
-    handleAMonthDissmis(value) {
-        this.setState({ mvalue: value });
-    }
-
-    handleClickMonthBox(e) {
-        this.refs.pickAMonth.show();
-    }
 
     componentDidMount() {
         this.getAccountBalances(2018);
     }
 
-    render() {
-        return (
-            <div>
-                <label><b>Selecciones un mes</b></label>
-                <div className="edit">
-                    <Picker
-                        ref="pickAMonth"
-                        years={{ min: 2018 }}
-                        value={this.state.mvalue}
-                        lang={pickerLang.months}
-                        theme="dark"
-                        onChange={this.handleAMonthChange}
-                        onDismiss={this.handleAMonthDissmis}
-                    >
-                        <MonthBox value={makeText(this.state.mvalue)} onClick={this.handleClickMonthBox} />
-                    </Picker>
-                </div>
 
-                <Chart
-                    chartType="LineChart"
-                    width="100%"
-                    height="400px"
-                    data={this.state.accountBalancesData}
-                    options={this.state.options}
-                />
-            </div>
-        )
+    selectedYearChange(year) {
+        this.setState({ selectedYear: year });
+        this.getAccountBalances(year.value);
     }
-
     getAccountBalances(year) {
-        fetch("http://localhost:3001/accountsBalances?year=2018")
+        fetch("http://localhost:3001/accountsBalances?year=" + year)
             .then(results => results.json())
             .then(balances => {
 
@@ -125,6 +76,35 @@ class AccountBalances extends React.Component {
                 console.log(balancesData);
             });
     }
+
+    render() {
+        return (
+            <div>
+                <Grid container spacing={3}>
+                    <Grid item xs={6}>
+                        <p>Año de consulta:</p>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Dropdown options={yearsOptions} onChange={this.selectedYearChange} value={this.state.selectedYear} placeholder="Select an option" />
+                    </Grid>
+                </Grid>
+                {
+                    this.state.accountBalancesData.length > 1 && (
+                        <Chart
+                            chartType="LineChart"
+                            width="100%"
+                            height="400px"
+                            data={this.state.accountBalancesData}
+                            options={this.state.options}
+                        />
+                    )
+                }
+
+
+            </div>
+        )
+    }
 }
+
 
 export default (AccountBalances);
