@@ -27,22 +27,27 @@ export class MovementController{
 
     public generateMovements(req: Request, res: Response){
         let movementsLogic: MovementsLogic = new MovementsLogic();
-        let bank: Banks = Banks[req.param("bank", Banks.Santander)];
-        movementsLogic.generateMovements(req.param("filePath", ""), bank,(movements)=>{
+        let bank: Banks = Banks[req.param("bank", undefined)];
+        let filepath:string = req.param("filePath", undefined);
+
+
+        movementsLogic.generateMovements(filepath, bank,(movements)=>{
             res.json(movements);
         });
     }
 
     public getMovements(req: Request, res: Response){
         let movementsLogic: MovementsLogic = new MovementsLogic();
-        
+        let accountNumber:string = req.query.accountNumber;
+        let year:number = req.query.year;
+
         movementsLogic.getMovements((err, movements)=>{
             if(err){
                 res.send(err);
             }else{
                 res.json(movements);
             }
-        });
+        }, accountNumber, year);
     }
 
     public getMovementsByCategory(req:Request, res:Response){

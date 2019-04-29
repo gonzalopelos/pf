@@ -21,9 +21,9 @@ export class XlsxParser {
 
         result.account.currentDate = result.movements[result.movements.length-1].date;
         
-        if(this.bank != Banks.Santander){
-            result.movements = [];
-        }
+        // if(this.bank != Banks.Santander){
+        //     result.movements = [];
+        // }
         return result;
     }
 

@@ -1,5 +1,7 @@
 import * as mongoose from 'mongoose';
 import { MovementSchema, MovementCategorySchema, CategoryMapping } from '../models/movementsModel';
+import path = require('path');
+import fs = require('fs');
 
 import { XlsxParser } from '../helpers/xlsxParser';
 import { Movement } from '../entities/movement';
@@ -46,6 +48,35 @@ export class MovementsLogic {
     }
 
     public generateMovements(filePath: string, bank: Banks, callback: (movements: Movement[]) => void): void {
+        if(!filePath || !bank)
+        {
+            let files: string[] = this.generateAccountMovementsFromDir('./AccountMovements/');
+            var bankFromFile: Banks;
+            files.filter(file => file.endsWith("xlsx")).forEach(f => {
+                if(f.toUpperCase().includes("BROU")){
+                    bankFromFile = Banks.Brou;
+                }
+                else if(f.toUpperCase().includes("SANTANDER")){
+                    bankFromFile = Banks.Santander;
+                }
+                else if(f.toUpperCase().includes("SCOTIABANK")){
+                    bankFromFile = Banks.Scotiabank;
+                }
+                this.generateAccountMovementsFromFile(path.join('./AccountMovements/', f), bankFromFile, (movements)=>{
+                    console.log("Movements generated form file: " + f);
+                    console.log(movements);
+                })
+            });
+        }
+        else
+        {
+            this.generateAccountMovementsFromFile(filePath, bank, callback);
+        }
+        
+    }
+
+    public generateAccountMovementsFromFile(filePath: string, bank: Banks, callback: (movements: Movement[]) => void): void {
+        
         let xlsxParser = new XlsxParser();
         let accountMovements = xlsxParser.parseXlsx(filePath, bank);
 
@@ -97,10 +128,39 @@ export class MovementsLogic {
             });
         }
     }
+    
 
-    public getMovements(callback: (err: any, movements: Movement[]) => void): void {
+    /**
+     * generateAccountMovementsFromDir
+     */
+    public generateAccountMovementsFromDir(dir: string) : string[] {
+        var result = [];
+        
+        if(fs.existsSync(dir)){
+            result = fs.readdirSync(dir);
+        }
+
+        return result;
+    }
+
+    public getMovements(callback: (err: any, movements: Movement[]) => void, accountNumber: string = undefined, year:number = undefined): void {
         let movements: Movement[] = [];
-        MovementModel.find({}, (err, auxMovs) => {
+
+        let conditions = {};
+        if(!!accountNumber){
+            conditions["accountNumber"] = accountNumber;
+        }
+
+        if(!!year){
+            let dateFrom: Date =  new Date(year, 0);
+            let dateTo: Date = new Date(year, 11);
+            conditions["date"] = {
+                '$gte': dateFrom,
+                '$lte': dateTo
+            }
+        }
+
+        MovementModel.find(conditions, (err, auxMovs) => {
             auxMovs.forEach(auxMov => movements.push(auxMov.toJSON() as Movement))
             callback(err, movements);
         });
